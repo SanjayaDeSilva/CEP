@@ -1,0 +1,32 @@
+{
+  "name": "dataInput",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "id",
+      "type": "INT"
+    },
+    {
+      "name": "timestamp",
+      "type": "STRING"
+    },
+    {
+      "name": "windspeed",
+      "type": "DOUBLE"
+    },
+    {
+      "name": "temperature",
+      "type": "DOUBLE"
+    },
+    {
+      "name": "solarflux",
+      "type": "DOUBLE"
+    },
+    {
+      "name": "humidity",
+      "type": "DOUBLE"
+    }
+  ]
+}

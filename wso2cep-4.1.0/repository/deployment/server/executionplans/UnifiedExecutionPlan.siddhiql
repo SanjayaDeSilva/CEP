@@ -1,0 +1,60 @@
+/* Enter a unique ExecutionPlan */
+@Plan:name('UnifiedExecutionPlan')
+
+/* Enter a unique description for ExecutionPlan */
+-- @Plan:description('ExecutionPlan')
+
+/* define streams/tables and write queries here ... */
+
+
+@Import('dataInput:1.0.0')
+define stream dataInput (id int, timestamp string, windspeed double, temperature double, solarflux double, humidity double);
+
+@Import('market:1.0.0')
+define stream mktStream (clearingprice double, clearingquantity double, sellertotal double, buyertotal double, clearingtype string, name string, time string);
+
+
+@Export('outputStream:1.0.0')
+define stream outputStream (name string, averageClearingPrice double, category string);
+
+@Export('newPrice:1.0.0')
+define stream newPrice (tstamp long, windspeed double, solarflux double, clearingprice double);
+
+@Export('predictionInputStream:1.0.0')
+define stream predictionInputStream (tstamp long, windspeed double, solarflux double);
+
+@Export('mktStreamUpdated:1.0.0')
+define stream mktStreamUpdated (tstamp long, clearingquantity double, sellertotal double, buyertotal double, clearingtype string, name string, time string);
+
+
+define table weather(timestamp long, windspeed double, temperature double, solarflux double, humidity double);
+
+from dataInput select smartgrid:timeStampUnix(timestamp) as timestamp, windspeed, temperature, solarflux, humidity  insert into weather;
+
+from mktStream select smartgrid:timeStampUnix(time) as tstamp, clearingquantity, sellertotal, buyertotal, clearingtype, name, time insert into mktStreamUpdated;
+
+
+/*from mktStreamUpdated#window.length(1) join weather
+on mktStreamUpdated.tstamp == weather.timestamp
+select tstamp, timestamp, clearingquantity, sellertotal, buyertotal, clearingtype, name, windspeed, temperature, solarflux, humidity
+insert into predictionInputStream; */
+
+/*from mktStreamUpdated#window.length(0) join foo#window.time(10 min) as w
+on (mktStreamUpdated.tstamp + 900000) == w.timestamp
+select w.timestamp as tstamp, windspeed
+insert into predictionInputStream;*/
+
+from mktStreamUpdated#window.length(1) join weather
+on (mktStreamUpdated.tstamp + 900) == weather.timestamp
+select weather.timestamp as tstamp, windspeed,solarflux
+insert into predictionInputStream;
+
+
+from predictionInputStream#ml:predict('/home/sanjaya/Downloads/windsolar', 'double')
+select *
+insert into newPrice;
+
+
+from newPrice
+select 'abc' as name, clearingprice as averageClearingPrice, '|abc' as category
+insert into outputStream;

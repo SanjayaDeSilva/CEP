@@ -1,0 +1,20 @@
+{
+  "name": "predictionInputStream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "tstamp",
+      "type": "LONG"
+    },
+    {
+      "name": "windspeed",
+      "type": "DOUBLE"
+    },
+    {
+      "name": "solarflux",
+      "type": "DOUBLE"
+    }
+  ]
+}
